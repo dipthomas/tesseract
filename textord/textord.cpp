@@ -224,7 +224,9 @@ Textord::Textord(CCStruct* ccstruct)
       double_MEMBER(textord_blshift_maxshift, 0.00, "Max baseline shift",
                     ccstruct_->params()),
       double_MEMBER(textord_blshift_xfraction, 9.99,
-                    "Min size of baseline shift", ccstruct_->params()) {}
+                    "Min size of baseline shift", ccstruct_->params()),
+      //yangjing01
+      INT_MEMBER(forced_line_size, -1, "forced line size", ccstruct_->params() ) {}
 
 Textord::~Textord() {
 }
@@ -283,8 +285,14 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
     gradient = make_rows(page_tr_, to_blocks);
   } else if (!PSM_SPARSE(pageseg_mode)) {
     // RAW_LINE, SINGLE_LINE, SINGLE_WORD and SINGLE_CHAR all need a single row.
+    //yangjing01 modified : 
+#if 1
+    gradient = TAL_make_single_row(page_tr_, to_block,
+      pageseg_mode == PSM_SINGLE_CHAR, to_blocks);
+#else
     gradient = make_single_row(page_tr_, pageseg_mode != PSM_RAW_LINE,
-                               to_block, to_blocks);
+      to_block, to_blocks);
+#endif
   }
   BaselineDetect baseline_detector(textord_baseline_debug,
                                    reskew, to_blocks);
@@ -301,8 +309,15 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
     // single word, and in SINGLE_CHAR mode, all the outlines
     // go in a single blob.
     TO_BLOCK* to_block = to_block_it.data();
+#if 1
+    //yangjing01 code:
+    TAL_make_single_word(pageseg_mode == PSM_SINGLE_CHAR,
+      to_block->get_rows(), to_block->block->row_list());
+#else
+    //tesseract 3.01 original code
     make_single_word(pageseg_mode == PSM_SINGLE_CHAR,
-                     to_block->get_rows(), to_block->block->row_list());
+      to_block->get_rows(), to_block->block->row_list());
+#endif
   }
   // Remove empties.
   cleanup_blocks(PSM_WORD_FIND_ENABLED(pageseg_mode), blocks);

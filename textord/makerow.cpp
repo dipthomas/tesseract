@@ -193,6 +193,41 @@ float make_single_row(ICOORD page_tr, bool allow_sub_blobs,
   return gradient;
 }
 
+//yangjing01 modified:
+float TAL_make_single_row(ICOORD page_tr, TO_BLOCK* block, bool single_char, TO_BLOCK_LIST* blocks)
+{
+  BLOBNBOX_IT blob_it = &block->blobs;
+  TO_ROW_IT row_it = block->get_rows();
+
+  // Include all the small blobs and large blobs.
+  blob_it.add_list_after(&block->small_blobs);
+  blob_it.add_list_after(&block->noise_blobs);
+  blob_it.add_list_after(&block->large_blobs);
+  //yangjing01 code for memory leak
+  //if (block->blobs.singleton()) {
+  //	blob_it.move_to_first();
+  //	float size = MakeRowFromSubBlobs(block, blob_it.data()->cblob(), &row_it);
+  //	if (size > block->line_size)
+  //		block->line_size = size;
+  //}
+  MakeRowFromBlobs(block->line_size, &blob_it, &row_it);
+  // Fit an LMS line to the rows.
+  for (row_it.mark_cycle_pt(); !row_it.cycled_list(); row_it.forward())
+    fit_lms_line(row_it.data());
+
+  float gradient;
+  if (single_char) {
+    gradient = 0.0f;
+  }
+  else {
+    float fit_error;
+    // Compute the skew based on the fitted line.
+    compute_page_skew(blocks, gradient, fit_error);
+  }
+
+  return gradient;
+}
+
 /**
  * @name make_rows
  *

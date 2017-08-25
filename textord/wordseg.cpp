@@ -49,6 +49,64 @@ EXTERN BOOL_VAR(textord_chopper_test, FALSE,
 #define FIXED_WIDTH_MULTIPLE  5
 #define BLOCK_STATS_CLUSTERS  10
 
+//yangjing01 modified : 
+bool TAL_make_single_word(bool one_blob, TO_ROW_LIST* rows, ROW_LIST* real_rows)
+{
+  TO_ROW_IT to_row_it(rows);
+  ROW_IT row_it(real_rows);
+  //to_real_row is the real row information of single row or single char mode
+  TO_ROW* real_to_row = NULL;
+  float row_max_height = 0.0;
+  for (to_row_it.mark_cycle_pt();
+    !to_row_it.cycled_list(); to_row_it.forward()){
+    TO_ROW* row = to_row_it.data();
+    float row_min_y = row->min_y();
+    float row_max_y = row->max_y();
+    float row_height = abs(row_max_y - row_min_y);
+    if (real_to_row == NULL
+      || row_height > row_max_height
+      || fabs(row_height - row_max_height) < 1.0f){
+      row_max_height = row_height;
+      real_to_row = row;
+    }
+  }
+
+  if (real_to_row == NULL){
+    return false;
+  }
+
+  C_BLOB_LIST cblobs;
+  C_BLOB_IT cblob_it(&cblobs);
+  BLOBNBOX_IT box_it(real_to_row->blob_list());
+  for (; !box_it.empty(); box_it.forward()){
+    BLOBNBOX* bblob = box_it.extract();
+    if (bblob->joined_to_prev() || (one_blob && !cblob_it.empty())) {
+      if (bblob->cblob() != NULL){
+        C_OUTLINE_IT cout_it(cblob_it.data()->out_list());
+        cout_it.move_to_last();
+        cout_it.add_list_after(bblob->cblob()->out_list());
+        delete bblob->cblob();
+      }
+    }
+    else {
+      if (bblob->cblob() != NULL)
+        cblob_it.add_after_then_move(bblob->cblob());
+    }
+    delete bblob;
+  }
+  // Convert the TO_ROW to a ROW.
+  ROW* real_row = new ROW(real_to_row, static_cast<inT16>(real_to_row->kern_size),
+    static_cast<inT16>(real_to_row->space_size));
+  WERD_IT word_it(real_row->word_list());
+  WERD* word = new WERD(&cblobs, 0, NULL);
+  word->set_flag(W_BOL, TRUE);
+  word->set_flag(W_EOL, TRUE);
+  word->set_flag(W_DONT_CHOP, one_blob);
+  word_it.add_after_then_move(word);
+  row_it.add_after_then_move(real_row);
+
+  return true;
+}
 
 /**
  * @name make_single_word

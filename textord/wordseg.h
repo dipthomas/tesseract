@@ -34,6 +34,9 @@ extern BOOL_VAR_H(textord_force_make_prop_words, FALSE,
 extern BOOL_VAR_H (textord_chopper_test, FALSE,
                    "Chopper is being tested.");
 
+//yangjing01 modified : 
+bool TAL_make_single_word(bool one_blob, TO_ROW_LIST* rows, ROW_LIST* real_rows);
+
 void make_single_word(bool one_blob, TO_ROW_LIST *rows, ROW_LIST* real_rows);
 void make_words(tesseract::Textord *textord,
                 ICOORD page_tr,                // top right

@@ -135,6 +135,13 @@ void fill_heights(TO_ROW *row, float gradient, int min_height,
 
 float make_single_row(ICOORD page_tr, bool allow_sub_blobs, TO_BLOCK* block,
                       TO_BLOCK_LIST* blocks);
+
+//yangjing01 modified:
+float TAL_make_single_row(ICOORD page_tr,
+  TO_BLOCK* block,
+  bool single_char,
+  TO_BLOCK_LIST* blocks);
+
 float make_rows(ICOORD page_tr,              // top right
                 TO_BLOCK_LIST *port_blocks);
 void make_initial_textrows(ICOORD page_tr,

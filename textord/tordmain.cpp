@@ -312,10 +312,18 @@ float Textord::filter_noise_blobs(
       * blob->bounding_box().width() * textord_noise_area_ratio)
       small_it.add_after_then_move(src_it.extract());
   }
-  for (src_it.mark_cycle_pt(); !src_it.cycled_list(); src_it.forward()) {
-    size_stats.add(src_it.data()->bounding_box().height(), 1);
+
+  //yangjing01 added : 
+  if (forced_line_size == -1) {
+    for (src_it.mark_cycle_pt(); !src_it.cycled_list(); src_it.forward()) {
+      size_stats.add(src_it.data()->bounding_box().height(), 1);
+    }
+    initial_x = size_stats.ile(textord_initialx_ile);
   }
-  initial_x = size_stats.ile(textord_initialx_ile);
+  else {
+    initial_x = float(forced_line_size) / textord_min_linesize;
+  }
+
   max_y = ceil(initial_x *
                (tesseract::CCStruct::kDescenderFraction +
                 tesseract::CCStruct::kXHeightFraction +

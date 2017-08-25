@@ -397,6 +397,9 @@ class Textord {
   BOOL_VAR_H(textord_noise_debug, FALSE, "Debug row garbage detector");
   double_VAR_H(textord_blshift_maxshift, 0.00, "Max baseline shift");
   double_VAR_H(textord_blshift_xfraction, 9.99, "Min size of baseline shift");
+
+  //yangjing01 added : 
+  INT_VAR_H(forced_line_size, -1, "forced line size");
 };
 }  // namespace tesseract.
 
